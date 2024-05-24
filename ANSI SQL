@@ -1,0 +1,97 @@
+1. Create Tables
+Authors Table
+sql
+CREATE TABLE Authors (
+    AuthorID INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50)
+);
+Books Table
+sql
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY,
+    Title VARCHAR(255),
+    AuthorID INT,
+    Genre VARCHAR(50),
+    PublishedYear INT,
+    ISBN VARCHAR(20) UNIQUE,
+    FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID)
+);
+Members Table
+sql
+CREATE TABLE Members (
+    MemberID INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(100) UNIQUE,
+    PhoneNumber VARCHAR(15)
+);
+Loans Table
+sql
+CREATE TABLE Loans (
+    LoanID INT PRIMARY KEY,
+    BookID INT,
+    MemberID INT,
+    LoanDate DATE,
+    ReturnDate DATE,
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (MemberID) REFERENCES Members(MemberID)
+);
+2. Insert Sample Data
+Insert Authors
+sql
+INSERT INTO Authors (AuthorID, FirstName, LastName) VALUES
+(1, 'George', 'Orwell'),
+(2, 'Jane', 'Austen'),
+(3, 'Mark', 'Twain');
+Insert Books
+sql
+INSERT INTO Books (BookID, Title, AuthorID, Genre, PublishedYear, ISBN) VALUES
+(1, '1984', 1, 'Dystopian', 1949, '9780451524935'),
+(2, 'Pride and Prejudice', 2, 'Romance', 1813, '9780141040349'),
+(3, 'Adventures of Huckleberry Finn', 3, 'Adventure', 1884, '9780486280615');
+Insert Members
+sql
+INSERT INTO Members (MemberID, FirstName, LastName, Email, PhoneNumber) VALUES
+(1, 'John', 'Doe', 'john.doe@example.com', '555-1234'),
+(2, 'Jane', 'Smith', 'jane.smith@example.com', '555-5678'),
+(3, 'Alice', 'Johnson', 'alice.johnson@example.com', '555-8765');
+Insert Loans
+sql
+INSERT INTO Loans (LoanID, BookID, MemberID, LoanDate, ReturnDate) VALUES
+(1, 1, 1, '2023-01-15', '2023-02-15'),
+(2, 2, 2, '2023-02-01', '2023-03-01'),
+(3, 3, 3, '2023-02-20', '2023-03-20');
+3. Queries
+Retrieve all Books and their Authors
+sql
+SELECT b.Title, a.FirstName, a.LastName, b.Genre, b.PublishedYear
+FROM Books b
+JOIN Authors a ON b.AuthorID = a.AuthorID;
+Retrieve all Books borrowed by a specific Member
+sql
+SELECT m.FirstName, m.LastName, b.Title, l.LoanDate, l.ReturnDate
+FROM Loans l
+JOIN Members m ON l.MemberID = m.MemberID
+JOIN Books b ON l.BookID = b.BookID
+WHERE m.MemberID = 1;
+List overdue Loans
+sql
+SELECT l.LoanID, m.FirstName, m.LastName, b.Title, l.LoanDate, l.ReturnDate
+FROM Loans l
+JOIN Members m ON l.MemberID = m.MemberID
+JOIN Books b ON l.BookID = b.BookID
+WHERE l.ReturnDate < CURRENT_DATE;
+Count the number of Books per Genre
+sql
+SELECT Genre, COUNT(*) AS NumberOfBooks
+FROM Books
+GROUP BY Genre;
+Find the most borrowed Book
+sql
+SELECT b.Title, COUNT(l.LoanID) AS NumberOfLoans
+FROM Loans l
+JOIN Books b ON l.BookID = b.BookID
+GROUP BY b.Title
+ORDER BY NumberOfLoans DESC
+LIMIT 1;
